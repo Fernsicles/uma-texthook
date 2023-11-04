@@ -9,6 +9,9 @@ import UnityPy
 app = Flask(__name__)
 socketio = SocketIO(app)
 config = json.loads(open('config.json', 'r').read())
+if not config['gamedata']:
+    config['gamedata'] = os.path.join(os.path.expanduser(
+        '~'), 'AppData', 'LocalLow', 'Cygames', 'umamusume')
 
 
 def getDialog(msg):

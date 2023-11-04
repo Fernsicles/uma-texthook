@@ -34,7 +34,7 @@ def getDialog(msg):
         if nextBlock == -1:
             dialog['Index'] = len(dialogs) - 1
         else:
-            dialog['Index'] = nextBlock
+            dialog['Index'] = nextBlock - 1
         scene['Dialog'].append(dialog)
     scene['Dialog'].sort(key=lambda x: x['Index'])
     return scene
@@ -44,6 +44,7 @@ def getDialog(msg):
 def receiveMsg():
     if request.method == 'POST':
         msg = msgpack.unpackb(request.get_data())
+        print(json.dumps(msg))
         if 'data' in msg and 'story_id' in msg['data']:
             scene = getDialog(msg)
             socketio.send(json.dumps(scene))

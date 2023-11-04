@@ -1,5 +1,5 @@
 from flask import Flask, request, abort, render_template
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, send
 import msgpack
 import sqlite3
 import json
@@ -62,7 +62,7 @@ def index():
 @socketio.on('connect')
 def resend():
     if curScene:
-        socketio.send(json.dumps(curScene))
+        send(json.dumps(curScene))
 
 
 if __name__ == '__main__':

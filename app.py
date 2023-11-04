@@ -43,6 +43,7 @@ def getDialog(msg):
 
 @app.route('/notify/response', methods=['POST'])
 def receiveMsg():
+    global curScene
     if request.method == 'POST':
         msg = msgpack.unpackb(request.get_data())
         print(json.dumps(msg))

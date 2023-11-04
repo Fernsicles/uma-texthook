@@ -9,6 +9,7 @@ import UnityPy
 app = Flask(__name__)
 socketio = SocketIO(app)
 config = json.loads(open('config.json', 'r').read())
+curScene = None
 if not config['gamedata']:
     config['gamedata'] = os.path.join(os.path.expanduser(
         '~'), 'AppData', 'LocalLow', 'Cygames', 'umamusume')
@@ -46,8 +47,8 @@ def receiveMsg():
         msg = msgpack.unpackb(request.get_data())
         print(json.dumps(msg))
         if 'data' in msg and 'story_id' in msg['data']:
-            scene = getDialog(msg)
-            socketio.send(json.dumps(scene))
+            curScene = getDialog(msg)
+            socketio.send(json.dumps(curScene))
         return ''
     else:
         abort(405)
@@ -56,6 +57,12 @@ def receiveMsg():
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
+
+
+@socketio.on('connect')
+def resend():
+    if curScene:
+        socketio.send(json.dumps(curScene))
 
 
 if __name__ == '__main__':

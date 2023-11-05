@@ -28,7 +28,7 @@ def getScene(storyId):
                 for x in env.objects if 'Title' in x.read_typetree()]
     dialogs = [x.read_typetree()
                for x in env.objects if 'Text' in x.read_typetree()]
-    scene = {'Title': timeline[0]['Title'], 'Dialog': []}
+    scene = {'Index': None, 'Title': timeline[0]['Title'], 'Dialog': []}
     for x in dialogs:
         nextBlock = x['NextBlock']
         dialog = {'Name': x['Name'], 'Text': x['Text']}

@@ -50,11 +50,11 @@ def receiveMsg():
         msg = msgpack.unpackb(request.get_data())
         print(json.dumps(msg))
         if 'data' in msg:
+            scenes = []
             if 'story_id' in msg['data']:
                 scenes = [getScene(msg['data']['story_id'])]
                 socketio.send(json.dumps(scenes))
             if 'unchecked_event_array' in msg['data']:
-                scenes = []
                 for x in msg['data']['unchecked_event_array']:
                     scenes.append(getScene(x['story_id']))
                 socketio.send(json.dumps(scenes))

@@ -9,17 +9,17 @@ import UnityPy
 app = Flask(__name__)
 socketio = SocketIO(app)
 config = json.loads(open('config.json', 'r').read())
-curScene = None
+scenes = None
 if not config['gamedata']:
     config['gamedata'] = os.path.join(os.path.expanduser(
         '~'), 'AppData', 'LocalLow', 'Cygames', 'umamusume')
 
 
-def getDialog(msg):
+def getScene(storyId):
     con = sqlite3.connect(os.path.join(config['gamedata'], 'meta'))
     cur = con.cursor()
     cur.execute(
-        f"SELECT h FROM a WHERE instr(n, '{msg['data']['story_id']}') AND NOT instr(n, 'resources');")
+        f"SELECT h FROM a WHERE instr(n, 'storytimeline_{storyId}') AND NOT instr(n, 'resources');")
     assetName = cur.fetchone()[0]
     assetPath = os.path.join(
         config['gamedata'], 'dat', assetName[0:2], assetName)
@@ -32,6 +32,8 @@ def getDialog(msg):
     for x in dialogs:
         nextBlock = x['NextBlock']
         dialog = {'Name': x['Name'], 'Text': x['Text']}
+        if not dialog['Name'] and not dialog['Text']:
+            continue
         if nextBlock == -1:
             dialog['Index'] = len(dialogs) - 1
         else:
@@ -43,13 +45,19 @@ def getDialog(msg):
 
 @app.route('/notify/response', methods=['POST'])
 def receiveMsg():
-    global curScene
+    global scenes
     if request.method == 'POST':
         msg = msgpack.unpackb(request.get_data())
         print(json.dumps(msg))
-        if 'data' in msg and 'story_id' in msg['data']:
-            curScene = getDialog(msg)
-            socketio.send(json.dumps(curScene))
+        if 'data' in msg:
+            if 'story_id' in msg['data']:
+                scenes = [getScene(msg['data']['story_id'])]
+                socketio.send(json.dumps(scenes))
+            if 'unchecked_event_array' in msg['data']:
+                scenes = []
+                for x in msg['data']['unchecked_event_array']:
+                    scenes.append(getScene(x['story_id']))
+                socketio.send(json.dumps(scenes))
         return ''
     else:
         abort(405)
@@ -62,8 +70,8 @@ def index():
 
 @socketio.on('connect')
 def resend():
-    if curScene:
-        send(json.dumps(curScene))
+    if scenes:
+        send(json.dumps(scenes))
 
 
 if __name__ == '__main__':

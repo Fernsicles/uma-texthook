@@ -24,20 +24,19 @@ def getScene(storyId):
     assetPath = os.path.join(
         config['gamedata'], 'dat', assetName[0:2], assetName)
     env = UnityPy.load(assetPath)
+    rootAsset = next(iter(env.container.values())).get_obj()
     timeline = [x.read_typetree()
                 for x in env.objects if 'Title' in x.read_typetree()]
-    dialogs = [x.read_typetree()
-               for x in env.objects if 'Text' in x.read_typetree()]
-    scene = {'Index': None, 'Title': timeline[0]['Title'], 'Dialog': []}
-    for x in dialogs:
-        nextBlock = x['NextBlock']
-        dialog = {'Name': x['Name'], 'Text': x['Text']}
+    textClips = [x for x in timeline[0]['BlockList'] if 'TextTrack' in x]
+    scene = {'Title': timeline[0]['Title'], 'Dialog': []}
+    for x in textClips:
+        index = x['BlockIndex']
+        textClipPathId = x['TextTrack']['ClipList'][0]['m_PathID']
+        textClip = rootAsset.assets_file.files[textClipPathId].read_typetree()
+        dialog = {'Index': index,
+                  'Name': textClip['Name'], 'Text': textClip['Text']}
         if not dialog['Name'] and not dialog['Text']:
             continue
-        if nextBlock == -1:
-            dialog['Index'] = len(dialogs) - 1
-        else:
-            dialog['Index'] = nextBlock - 1
         scene['Dialog'].append(dialog)
     scene['Dialog'].sort(key=lambda x: x['Index'])
     return scene

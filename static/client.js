@@ -7,10 +7,11 @@ socket.on('message', (msg) => {
         let scene = Object.assign(document.createElement('li'));
         let title = Object.assign(document.createElement('div'), { textContent: i.Title });
         scene.append(title);
-        let dialog = Object.assign(document.createElement('ul'));
+        let dialog = Object.assign(document.createElement('ol'));
         scene.append(dialog);
         i.Dialog.forEach((i) => {
             let element = Object.assign(document.createElement('li'));
+            element.value = i.Index;
             let name = Object.assign(document.createElement('div'), { textContent: i.Name });
             element.append(name);
             let text = Object.assign(document.createElement('div'), { textContent: i.Text });

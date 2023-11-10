@@ -56,6 +56,9 @@ def receiveMsg():
             if 'unchecked_event_array' in msg['data']:
                 for x in msg['data']['unchecked_event_array']:
                     newScenes.append(getScene(x['story_id']))
+            if 'single_mode_load_common' in msg['data']:
+                for x in msg['data']['single_mode_load_common']['unchecked_event_array']:
+                    newScenes.append(getScene(x['story_id']))
             if newScenes:
                 scenes = newScenes
             socketio.send(json.dumps(scenes))

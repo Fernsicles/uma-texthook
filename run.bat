@@ -1,2 +1,2 @@
 .\venv\Scripts\activate
-python3 app.py
+start "" "python3 app.py"

@@ -33,9 +33,9 @@ def getScene(storyId):
         index = x['BlockIndex']
         textClipPathId = x['TextTrack']['ClipList'][0]['m_PathID']
         textClip = rootAsset.assets_file.files[textClipPathId].read_typetree()
-        dialog = {'Index': index,
-                  'Name': textClip['Name'], 'Text': textClip['Text']}
-        if not dialog['Name'] and not dialog['Text']:
+        dialog = {'Index': index, 'Name': textClip['Name'],
+                  'Text': textClip['Text'], 'Choices': textClip['ChoiceDataList']}
+        if not dialog['Name'] and not dialog['Text'] and not dialog['Choices']:
             continue
         scene['Dialog'].append(dialog)
     scene['Dialog'].sort(key=lambda x: x['Index'])

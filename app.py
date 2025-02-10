@@ -19,10 +19,11 @@ def getScene(storyId):
     con = sqlite3.connect(os.path.join(config['gamedata'], 'meta'))
     cur = con.cursor()
     cur.execute(
-        f"SELECT h FROM a WHERE instr(n, 'storytimeline_{storyId}') AND NOT instr(n, 'resources');")
+        f"SELECT h FROM a WHERE instr(n, 'timeline_{storyId}') AND NOT instr(n, 'resources') AND NOT instr(n, 'ast_ruby');")
     assetName = cur.fetchone()[0]
     assetPath = os.path.join(
         config['gamedata'], 'dat', assetName[0:2], assetName)
+    print(assetPath)
     env = UnityPy.load(assetPath)
     rootAsset = next(iter(env.container.values())).get_obj()
     timeline = [x.read_typetree()
@@ -39,6 +40,7 @@ def getScene(storyId):
             continue
         scene['Dialog'].append(dialog)
     scene['Dialog'].sort(key=lambda x: x['Index'])
+    print(scene)
     return scene
 
 
@@ -52,7 +54,6 @@ def receiveMsg():
             newScenes = []
             if 'story_id' in msg['data']:
                 newScenes = [getScene(msg['data']['story_id'])]
-                socketio.send(json.dumps(scenes))
             if 'unchecked_event_array' in msg['data']:
                 for x in msg['data']['unchecked_event_array']:
                     newScenes.append(getScene(x['story_id']))
@@ -66,6 +67,15 @@ def receiveMsg():
     else:
         abort(405)
 
+@app.route('/storyid', methods=['POST'])
+def receiveStoryId():
+    global scenes
+    if request.method == 'POST':
+        scenes = [getScene(request.get_data().decode())]
+        socketio.send(json.dumps(scenes))
+        return ''
+    else:
+        abort(405)
 
 @app.route('/', methods=['GET'])
 def index():
